@@ -51,6 +51,42 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 confluence = get_confluence_instance()
 
+# Color name mapping (RGB values and hex to named classes)
+# Used for preserving text highlights and colors as span class names
+HIGHLIGHT_COLOR_MAP = {
+    # Yellow variations
+    "rgb(255, 255, 0)": "yellow",
+    "rgb(255,255,0)": "yellow",
+    "#ffff00": "yellow",
+    "#ff0": "yellow",
+    # Purple variations
+    "rgb(128, 0, 128)": "purple",
+    "rgb(128,0,128)": "purple",
+    "#800080": "purple",
+    # Grey variations
+    "rgb(128, 128, 128)": "grey",
+    "rgb(128,128,128)": "grey",
+    "#808080": "grey",
+    # Cyan variations
+    "rgb(0, 255, 255)": "cyan",
+    "rgb(0,255,255)": "cyan",
+    "#00ffff": "cyan",
+    "#0ff": "cyan",
+    # Magenta variations
+    "rgb(255, 0, 255)": "magenta",
+    "rgb(255,0,255)": "magenta",
+    "#ff00ff": "magenta",
+    "#f0f": "magenta",
+    # Green variations
+    "rgb(0, 128, 0)": "green",
+    "rgb(0,128,0)": "green",
+    "#008000": "green",
+    "rgb(0, 255, 0)": "green",
+    "rgb(0,255,0)": "green",
+    "#00ff00": "green",
+    "#0f0": "green",
+}
+
 
 class JiraIssue(BaseModel):
     key: str
@@ -692,12 +728,61 @@ class Page(Document):
             # Return as details element
             return f"\n<details>\n<summary>{summary_text}</summary>\n\n{content}\n\n</details>\n\n"
 
+        def _extract_css_property(self, style: str, property_name: str) -> str | None:
+            """Extract a CSS property value from a style string."""
+            pattern = rf"{property_name}\s*:\s*([^;]+)"
+            match = re.search(pattern, style, re.IGNORECASE)
+            return match.group(1).strip() if match else None
+
+        def _get_color_name(self, color_value: str) -> str:
+            """Map a color value to a named class, or create a sanitized fallback."""
+            normalized = color_value.lower().strip()
+            if normalized in HIGHLIGHT_COLOR_MAP:
+                return HIGHLIGHT_COLOR_MAP[normalized]
+            # Fallback: sanitize the color value for use as a class name
+            return re.sub(r"[^a-z0-9]", "-", normalized).strip("-")
+
         def convert_span(self, el: BeautifulSoup, text: str, parent_tags: list[str]) -> str:
             if el.has_attr("data-macro-name"):
                 if el["data-macro-name"] == "jira":
                     return self.convert_jira_issue(el, text, parent_tags)
 
+            classes = []
+            style_attr = el.get("style", "")
+
+            if settings.export.preserve_highlights:
+                bg_color = self._extract_css_property(style_attr, "background-color")
+                if bg_color:
+                    color_name = self._get_color_name(bg_color)
+                    classes.append(f"highlight-{color_name}")
+
+            if settings.export.preserve_text_colors:
+                text_color = self._extract_css_property(style_attr, "color")
+                if text_color:
+                    color_name = self._get_color_name(text_color)
+                    classes.append(f"color-{color_name}")
+
+            # Check data attributes (Confluence Cloud)
+            if settings.export.preserve_highlights and el.has_attr("data-highlight-colour"):
+                color_name = self._get_color_name(str(el["data-highlight-colour"]))
+                classes.append(f"highlight-{color_name}")
+
+            if classes:
+                class_str = " ".join(classes)
+                return f'<span class="{class_str}">{text}</span>'
+
             return text
+
+        def convert_mark(self, el: BeautifulSoup, text: str, parent_tags: list[str]) -> str:
+            """Convert mark elements (highlights) to span tags with class names."""
+            if not settings.export.preserve_highlights:
+                return text
+
+            style = el.get("style", "")
+            bg_color = self._extract_css_property(style, "background-color")
+            color_name = self._get_color_name(bg_color) if bg_color else "yellow"
+
+            return f'<span class="highlight-{color_name}">{text}</span>'
 
         def convert_attachments(self, el: BeautifulSoup, text: str, parent_tags: list[str]) -> str:
             file_header = el.find("th", {"class": "filename-column"})

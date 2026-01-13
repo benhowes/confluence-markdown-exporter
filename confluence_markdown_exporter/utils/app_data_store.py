@@ -239,6 +239,22 @@ class ExportConfig(BaseModel):
             "If enabled, the title will be added as a top-level heading."
         ),
     )
+    preserve_highlights: bool = Field(
+        default=True,
+        title="Preserve Highlights",
+        description=(
+            "Preserve text highlights/background colors as <span> tags with class names. "
+            "Example output: <span class=\"highlight-yellow\">text</span>"
+        ),
+    )
+    preserve_text_colors: bool = Field(
+        default=True,
+        title="Preserve Text Colors",
+        description=(
+            "Preserve text colors as <span> tags with class names. "
+            "Example output: <span class=\"color-purple\">text</span>"
+        ),
+    )
 
 
 class ConfigModel(BaseModel):
