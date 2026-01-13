@@ -53,38 +53,26 @@ confluence = get_confluence_instance()
 
 # Color name mapping (RGB values and hex to named classes)
 # Used for preserving text highlights and colors as span class names
+# These are the actual Confluence highlight colors
 HIGHLIGHT_COLOR_MAP = {
-    # Yellow variations
-    "rgb(255, 255, 0)": "yellow",
-    "rgb(255,255,0)": "yellow",
-    "#ffff00": "yellow",
-    "#ff0": "yellow",
-    # Purple variations
-    "rgb(128, 0, 128)": "purple",
-    "rgb(128,0,128)": "purple",
-    "#800080": "purple",
-    # Grey variations
-    "rgb(128, 128, 128)": "grey",
-    "rgb(128,128,128)": "grey",
-    "#808080": "grey",
-    # Cyan variations
-    "rgb(0, 255, 255)": "cyan",
-    "rgb(0,255,255)": "cyan",
-    "#00ffff": "cyan",
-    "#0ff": "cyan",
-    # Magenta variations
-    "rgb(255, 0, 255)": "magenta",
-    "rgb(255,0,255)": "magenta",
-    "#ff00ff": "magenta",
-    "#f0f": "magenta",
-    # Green variations
-    "rgb(0, 128, 0)": "green",
-    "rgb(0,128,0)": "green",
-    "#008000": "green",
-    "rgb(0, 255, 0)": "green",
-    "rgb(0,255,0)": "green",
-    "#00ff00": "green",
-    "#0f0": "green",
+    # Yellow (Confluence uses a peach/orange shade)
+    "rgb(254, 222, 200)": "yellow",
+    "rgb(254,222,200)": "yellow",
+    # Purple
+    "rgb(223, 216, 253)": "purple",
+    "rgb(223,216,253)": "purple",
+    # Grey
+    "rgb(220, 223, 228)": "grey",
+    "rgb(220,223,228)": "grey",
+    # Cyan
+    "rgb(198, 237, 251)": "cyan",
+    "rgb(198,237,251)": "cyan",
+    # Magenta
+    "rgb(253, 208, 236)": "magenta",
+    "rgb(253,208,236)": "magenta",
+    # Green
+    "rgb(211, 241, 167)": "green",
+    "rgb(211,241,167)": "green",
 }
 
 
